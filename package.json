@@ -4,7 +4,7 @@
   "description": "sync todoist data",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc ava"
   },
   "repository": {
     "type": "git",
@@ -27,12 +27,14 @@
     "sdk0": "^0.1.0"
   },
   "devDependencies": {
+    "ava": "^3.11.0",
     "eslint": "^7.6.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-config-willin": "^1.0.5",
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5"
   },
   "lint-staged": {
@@ -45,5 +47,30 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "engines": {
+    "node": ">=8.0"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.js",
+      "!**/_*/*.js",
+      "!**/_*.js"
+    ]
+  },
+  "nyc": {
+    "lines": 80,
+    "check-coverage": true,
+    "reporter": [
+      "lcov",
+      "html"
+    ],
+    "report-dir": "./.nyc_output",
+    "exclude": [
+      "test",
+      "test{,-*}.js",
+      "**/*.test.js",
+      "**/__tests__/**"
+    ]
   }
 }
