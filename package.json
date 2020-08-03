@@ -4,7 +4,8 @@
   "description": "sync todoist data",
   "main": "src/index.js",
   "scripts": {
-    "test": "nyc ava"
+    "test": "nyc ava",
+    "lint": "eslint --fix --ext .js,.vue --ignore-path .eslintignore ."
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
   },
   "homepage": "https://github.com/willin-love/todoist-sync#readme",
   "dependencies": {
+    "rimraf": "^3.0.2",
     "sdk0": "^0.1.0"
   },
   "devDependencies": {
