@@ -10,27 +10,6 @@ const client = sdk({
   }
 });
 
-const getProjects = () => client.get('/rest/v1/projects').then(({ data }) => data);
-
-const getSections = () => client.get('/rest/v1/sections').then(({ data }) => data);
-
-const getLabels = () => client.get('/rest/v1/labels').then(({ data }) => data);
-
-const getActiveTasks = () => client.get('/rest/v1/tasks').then(({ data }) => data);
-
-const getCompletedTasks = async (page = 0) => {
-  const { data: { items = [] } = {} } = await client.get('/sync/v8/completed/get_all', {
-    params: {
-      limit: 200,
-      offset: page * 200
-    }
-  });
-  if (items.length === 200) {
-    return [...items, await getCompletedTasks(page + 1)];
-  }
-  return items;
-};
-
 const colors = {
   30: '#b8256f',
   31: '#db4035',
@@ -52,6 +31,72 @@ const colors = {
   47: '#808080',
   48: '#b8b8b8',
   49: '#ccac93'
+};
+
+const getProjects = () =>
+  client.get('/rest/v1/projects').then(({ data }) =>
+    data
+      .filter((p) => p.shared)
+      .map((p) => {
+        Object.assign(p, {
+          color: colors[p.color],
+          sync_id: undefined,
+          comment_count: undefined,
+          parent: undefined,
+          shared: undefined,
+          favorite: undefined
+        });
+        return p;
+      })
+  );
+
+const getSections = () => client.get('/rest/v1/sections').then(({ data }) => data);
+
+const getLabels = () =>
+  client.get('/rest/v1/labels').then(({ data }) =>
+    data.map((l) => {
+      Object.assign(l, {
+        color: colors[l.color],
+        favorite: undefined
+      });
+      return l;
+    })
+  );
+
+const getActiveTasks = () =>
+  client.get('/rest/v1/tasks').then(({ data }) =>
+    data.map((t) => {
+      Object.assign(t, {
+        comment_count: undefined,
+        url: undefined
+      });
+      return t;
+    })
+  );
+
+const getCompletedTasks = async (page = 0) => {
+  const { data: { items = [] } = {} } = await client.get('/sync/v8/completed/get_all', {
+    params: {
+      limit: 200,
+      offset: page * 200,
+      since: '2020-8-1T00:00'
+    }
+  });
+  if (items.length === 200) {
+    return [...items, await getCompletedTasks(page + 1)];
+  }
+  return items.map((t) => {
+    const { user_id, content, completed_date, project_id, task_id } = t;
+    return {
+      id: task_id,
+      assignee: user_id,
+      section_id: 0,
+      project_id,
+      content,
+      completed: true,
+      completed_date
+    };
+  });
 };
 
 module.exports = {
